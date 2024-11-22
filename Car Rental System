@@ -1,0 +1,222 @@
+Project Structure:
+car-rental-service
+├── src
+│   ├── main
+│   │   ├── java
+│   │   │   └── com
+│   │   │       └── example
+│   │   │           └── carrental
+│   │   │               ├── controller
+│   │   │               ├── model
+│   │   │               ├── repository
+│   │   │               └── service
+│   │   ├── resources
+│   │   │   ├── application.properties
+│   │   └── META-INF
+└── pom.xml
+3. Create the Model Class:
+package com.example.carrental.model;
+
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+
+@Entity
+public class CarRental {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String customerName;
+    private String carModel;
+    private String rentalDate;
+    private String returnDate;
+    private double rentalPrice;
+
+    // Getters and Setters
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getCustomerName() {
+        return customerName;
+    }
+
+    public void setCustomerName(String customerName) {
+        this.customerName = customerName;
+    }
+
+    public String getCarModel() {
+        return carModel;
+    }
+
+    public void setCarModel(String carModel) {
+        this.carModel = carModel;
+    }
+
+    public String getRentalDate() {
+        return rentalDate;
+    }
+
+    public void setRentalDate(String rentalDate) {
+        this.rentalDate = rentalDate;
+    }
+
+    public String getReturnDate() {
+        return returnDate;
+    }
+
+    public void setReturnDate(String returnDate) {
+        this.returnDate = returnDate;
+    }
+
+    public double getRentalPrice() {
+        return rentalPrice;
+    }
+
+    public void setRentalPrice(double rentalPrice) {
+        this.rentalPrice = rentalPrice;
+    }
+}
+4. Create the Repository:
+package com.example.carrental.repository;
+
+import com.example.carrental.model.CarRental;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface CarRentalRepository extends JpaRepository<CarRental, Long> {
+}
+5. Create the Service:
+The service will contain the business logic for managing car rentals.
+
+java
+Copy code
+package com.example.carrental.service;
+
+import com.example.carrental.model.CarRental;
+import com.example.carrental.repository.CarRentalRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
+
+@Service
+public class CarRentalService {
+
+    @Autowired
+    private CarRentalRepository carRentalRepository;
+
+    // Get all car rentals
+    public List<CarRental> getAllRentals() {
+        return carRentalRepository.findAll();
+    }
+
+    // Get a car rental by ID
+    public Optional<CarRental> getRentalById(Long id) {
+        return carRentalRepository.findById(id);
+    }
+
+    // Create a new car rental
+    public CarRental createRental(CarRental carRental) {
+        return carRentalRepository.save(carRental);
+    }
+
+    // Delete a car rental by ID
+    public void deleteRental(Long id) {
+        carRentalRepository.deleteById(id);
+    }
+}
+6. Create the Controller:
+package com.example.carrental.controller;
+
+import com.example.carrental.model.CarRental;
+import com.example.carrental.service.CarRentalService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Optional;
+
+@RestController
+@RequestMapping("/rentals")
+public class CarRentalController {
+
+    @Autowired
+    private CarRentalService carRentalService;
+
+    // Get all car rentals
+    @GetMapping
+    public List<CarRental> getAllRentals() {
+        return carRentalService.getAllRentals();
+    }
+
+    // Get a car rental by ID
+    @GetMapping("/{id}")
+    public Optional<CarRental> getRentalById(@PathVariable Long id) {
+        return carRentalService.getRentalById(id);
+    }
+
+    // Create a new car rental
+    @PostMapping
+    public CarRental createRental(@RequestBody CarRental carRental) {
+        return carRentalService.createRental(carRental);
+    }
+
+    // Delete a car rental by ID
+    @DeleteMapping("/{id}")
+    public void deleteRental(@PathVariable Long id) {
+        carRentalService.deleteRental(id);
+    }
+}
+7. Configure the Application Properties:
+
+spring.datasource.url=jdbc:h2:mem:testdb
+spring.datasource.driverClassName=org.h2.Driver
+spring.datasource.username=sa
+spring.datasource.password=password
+spring.jpa.database-platform=org.hibernate.dialect.H2Dialect
+spring.h2.console.enabled=true
+spring.h2.console.path=/h2-console
+spring.jpa.hibernate.ddl-auto=update
+8. Main Application Class:
+
+package com.example.carrental;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class CarRentalApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(CarRentalApplication.class, args);
+    }
+}
+9. Run the Application:
+mvn spring-boot:run
+Once the application is running, it will be available at http://localhost:8080.
+
+10. Test the Application:
+You can test the following endpoints using Postman or cURL:
+
+GET /rentals - Get all car rentals.
+
+GET /rentals/{id} - Get a specific car rental by ID.
+
+POST /rentals - Create a new car rental with a JSON payload like this:
+
+json
+Copy code
+{
+    "customerName": "John Doe",
+    "carModel": "Toyota Corolla",
+    "rentalDate": "2024-11-22",
+    "returnDate": "2024-11-30",
+    "rentalPrice": 250.00
+}
